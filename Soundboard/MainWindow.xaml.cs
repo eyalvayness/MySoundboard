@@ -29,21 +29,73 @@ namespace Soundboard
     public partial class MainWindow : Window
     {
         private static readonly string defaultExt = "mp3";
-
+        readonly List<string> devicesNames;
         readonly SoundStorage Storage;
 
-        WaveOutEvent outputDevice;
+        WaveOutEvent virtualOutputDevice;
+        WaveOutEvent hardwareOutputDevice;
 
         public MainWindow()
         {
             InitializeComponent();
-            //allSounds = new ObservableCollection<Sound>(Storage.SoundStorage.LoadSounds());
             Storage = new SoundStorage();
+            virtualOutputDevice = new WaveOutEvent();
+            hardwareOutputDevice = new WaveOutEvent();
+
+            devicesNames = new List<string>();
+            for (int i = 0; i < WaveOut.DeviceCount; i++)
+                if (WaveOut.GetCapabilities(i).SupportsPlaybackRateControl)
+                    devicesNames.Add(WaveOut.GetCapabilities(i).ProductName);
+            VirtualOutputDevices.ItemsSource = devicesNames;
+            VirtualOutputDevices.SelectedIndex = 0;
+
+            HardwareOutputDevices.ItemsSource = devicesNames;
+            HardwareOutputDevices.SelectedIndex = 0;
 
             SoundsDisplayer.DataContext = Storage.Sounds;
-            outputDevice = new WaveOutEvent();
+            VolumeSlider.Value = Settings.Default.Volume;
         }
-        private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) => 
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Settings.Default.Save();
+        }
+
+        private void ChangeVirtualOutputDevice(object sender, SelectionChangedEventArgs e)
+        {
+            var cb = sender as ComboBox;
+            if (e.AddedItems.Count != 1)
+                return;
+            //Settings.Default.OutputDeviceName = OutputDevices.SelectedItem.ToString();
+            if (virtualOutputDevice != null)
+            {
+                virtualOutputDevice.Dispose();
+                virtualOutputDevice = null;
+            }
+            virtualOutputDevice = new WaveOutEvent() { DeviceNumber = cb.SelectedIndex };
+        }
+
+        private void ChangeHardwareOutputDevice(object sender, SelectionChangedEventArgs e)
+        {
+            var cb = sender as ComboBox;
+            if (e.AddedItems.Count != 1)
+                return;
+            //Settings.Default.OutputDeviceName = OutputDevices.SelectedItem.ToString();
+            if (hardwareOutputDevice != null)
+            {
+                hardwareOutputDevice.Dispose();
+                hardwareOutputDevice = null;
+            }
+            hardwareOutputDevice = new WaveOutEvent() { DeviceNumber = cb.SelectedIndex };
+        }
+
+        private void ChangeVolume(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            virtualOutputDevice.Volume = (float)e.NewValue / 100f;
+            hardwareOutputDevice.Volume = (float)e.NewValue / 100f;
+            Settings.Default.Volume = (float)e.NewValue;
+        }
 
         private void AddNewClick(object sender, RoutedEventArgs e)
         {
@@ -67,14 +119,14 @@ namespace Soundboard
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Sound s = ((sender as Button).DataContext as Sound);
-            var file = s.AudioFile;
-            outputDevice.Stop();
+            virtualOutputDevice.Stop();
+            hardwareOutputDevice.Stop();
 
-            outputDevice.Init(file);
-            outputDevice.Play();
+            virtualOutputDevice.Init(s.AudioFile);
+            hardwareOutputDevice.Init(s.AudioFile);
+            virtualOutputDevice.Play();
+            hardwareOutputDevice.Play();
         }
-
-
         //private void DG_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e) => Storage.SaveSounds();
     }
 }

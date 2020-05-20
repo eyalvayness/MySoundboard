@@ -13,9 +13,13 @@
         <ToolBar DockPanel.Dock="Top">
             <Button Content="Add New" Click="AddNewClick"/>
             <Separator/>
-            <ComboBox />
+            <Label Content="Hardware"/>
+            <ComboBox Name="HardwareOutputDevices" SelectionChanged="ChangeHardwareOutputDevice"/>
+            <Label Content="Virtual"/>
+            <ComboBox Name="VirtualOutputDevices" SelectionChanged="ChangeVirtualOutputDevice"/>
+            <Separator/>
             <Label Content="Volume"/>
-            <Slider Name="VolumeSlider" ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Center" Minimum="0" Maximum="100" TickFrequency="1" Width="100"/>
+            <Slider Name="VolumeSlider" ValueChanged="ChangeVolume" VerticalAlignment="Center" Minimum="0" Maximum="100" TickFrequency="1" Width="100"/>
             <Separator/>
             <Button Content="Delete All" Click="DeleteAllClick"/>
         </ToolBar>
