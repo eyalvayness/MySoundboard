@@ -12,13 +12,28 @@
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <Button Content="Add New" Click="AddNewClick"/>
+            <Separator/>
+            <ComboBox />
+            <Label Content="Volume"/>
+            <Slider Name="VolumeSlider" ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Center" Minimum="0" Maximum="100" TickFrequency="1" Width="100"/>
+            <Separator/>
+            <Button Content="Delete All" Click="DeleteAllClick"/>
         </ToolBar>
-        
-        <DataGrid ItemsSource="{Binding}" Name="DG" AutoGenerateColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Path" Binding="{Binding Path}" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-            </DataGrid.Columns>
-        </DataGrid>
+
+        <StackPanel Orientation="Vertical">
+            <DataGrid ItemsSource="{Binding}" Name="SoundsDisplayer" AutoGenerateColumns="False" CanUserReorderColumns="False" SelectionUnit="CellOrRowHeader">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Preview" Click="Button_Click"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Path" Binding="{Binding Path}" CanUserSort="False" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
     </DockPanel>
 </Window>

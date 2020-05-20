@@ -1,5 +1,9 @@
 ﻿using Microsoft.Win32;
+using NAudio.Wave;
+using Newtonsoft.Json.Linq;
 using Soundboard.Models;
+using Soundboard.Properties;
+using Soundboard.Storage;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,33 +28,53 @@ namespace Soundboard
     /// </summary>
     public partial class MainWindow : Window
     {
-        ObservableCollection<Sound> filenames;
+        private static readonly string defaultExt = "mp3";
+
+        readonly SoundStorage Storage;
+
+        WaveOutEvent outputDevice;
 
         public MainWindow()
         {
             InitializeComponent();
-            filenames = new ObservableCollection<Sound>();
+            //allSounds = new ObservableCollection<Sound>(Storage.SoundStorage.LoadSounds());
+            Storage = new SoundStorage();
 
-            DG.DataContext = filenames;
+            SoundsDisplayer.DataContext = Storage.Sounds;
+            outputDevice = new WaveOutEvent();
         }
+        private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) => 
 
         private void AddNewClick(object sender, RoutedEventArgs e)
         {
             var d = new OpenFileDialog
             {
-                Filter = "mp3 files (*.mp3)|*.mp3|All files (*.*)|*.*",
+                Filter = $"{defaultExt} files (*.{defaultExt})|*.{defaultExt}",
                 Title = "Pick the sound to add to the sound board",
                 Multiselect = false
             };
 
             if (d.ShowDialog() == true)
             {
-                if (!d.FileName.EndsWith(".mp3"))
-                    return;
-
-                Sound s = new Sound(d.FileName, d.SafeFileName);
-                filenames.Add(s);
+                //Sound s = new Sound(d.FileName, System.IO.Path.GetFileNameWithoutExtension(d.FileName));
+                Storage.AddSound(d.FileName);
+                Storage.SaveSounds();
             }
         }
+
+        private void DeleteAllClick(object sender, RoutedEventArgs e) => Storage.DeleteAll();
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Sound s = ((sender as Button).DataContext as Sound);
+            var file = s.AudioFile;
+            outputDevice.Stop();
+
+            outputDevice.Init(file);
+            outputDevice.Play();
+        }
+
+
+        //private void DG_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e) => Storage.SaveSounds();
     }
 }
