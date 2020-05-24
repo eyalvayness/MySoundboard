@@ -75,6 +75,12 @@ namespace Soundboard
             _source = HwndSource.FromHwnd(_windowHandle);
             _source.AddHook(HwndHook);
 
+            var ss = Storage.Sounds.ToList();
+            foreach (Sound s in ss)
+            {
+                if (s.VKey != 0)
+                    RegisterHotKey(_windowHandle, s.Id, s.ModifsKey, s.VKey);
+            }
             //bool a = RegisterHotKey(_windowHandle, HOTKEY_ID, MOD_CONTROL, VK_CAPITAL); //CTRL + CAPS_LOCK
             //bool b = RegisterHotKey(_windowHandle, HOTKEY_ID + 1, MOD_SHIFT, VK_CAPITAL);
         }
@@ -88,11 +94,14 @@ namespace Soundboard
                     int id = wParam.ToInt32();
                     
                     int vkey = ((int)lParam >> 16) & 0xFFFF;
-                    int mdif = (int)lParam & 0xFF;
+                    int mkey = (int)lParam & 0xFF;
+                    Key k = KeyInterop.KeyFromVirtualKey(vkey);
+                    ModifierKeys mk = (ModifierKeys)mkey;
 
                     Sound sound = Storage.Sounds.Where(s => s.Id == id).FirstOrDefault();
+                    sound?.Stop();
                     sound?.Play();
-
+                    handled = true;
                     break;
             }
             return IntPtr.Zero;
@@ -188,11 +197,23 @@ namespace Soundboard
             }
         }
 
+        private void SaveHotKeys(object sender, RoutedEventArgs e)
+        {
+            Button b = sender as Button;
+            Sound s = b.DataContext as Sound;
+            s.SaveShortcutKeys();
+
+            UnregisterHotKey(_windowHandle, s.Id);
+            RegisterHotKey(_windowHandle, s.Id, s.ModifsKey, s.VKey);
+        }
+
         private void ResetShorcutClick(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
             Sound s = b.DataContext as Sound;
             s.ClearHotKeys();
+            s.SaveShortcutKeys();
+            UnregisterHotKey(_windowHandle, s.Id);
         }
 
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -226,6 +247,11 @@ namespace Soundboard
         {
             TextBox tb = (TextBox)sender;
             tb.KeyDown -= MainWindow_KeyDown;
+
+            Sound s = tb.DataContext as Sound;
+            s.SaveShortcutKeys();
+            UnregisterHotKey(_windowHandle, s.Id);
+            RegisterHotKey(_windowHandle, s.Id, s.ModifsKey, s.VKey);
         }
 
         //private void DG_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e) => Storage.SaveSounds();

@@ -26,8 +26,32 @@ namespace Soundboard.Models
         WaveOutEvent virtualDevice, hardwareDevice;
 
 
-        [JsonProperty("Key")] Key shortcutKey;
-        [JsonProperty("ModifierKeys")] ModifierKeys shortcutModifierKeys;
+        Key tempShortcutKey, _shortcutKey;
+        ModifierKeys tempShortcutModifierKeys, _modifierKeys;
+
+        [JsonProperty("Key")] Key ShortcutKey 
+        { 
+            get => _shortcutKey; 
+            set 
+            {
+                SetProperty(ref _shortcutKey, value);
+                tempShortcutKey = value;
+                CreateShortcutString();
+            } 
+        }
+        [JsonProperty("ModifierKeys")] ModifierKeys ShortcutModifierKeys
+        {
+            get => _modifierKeys;
+            set
+            {
+                SetProperty(ref _modifierKeys, value);
+                tempShortcutModifierKeys = value;
+                CreateShortcutString();
+            }
+        }
+
+        [JsonIgnore] public uint VKey => (uint)KeyInterop.VirtualKeyFromKey(ShortcutKey);
+        [JsonIgnore] public uint ModifsKey => (uint)ShortcutModifierKeys;
 
         [JsonIgnore] public int Id => Path.GetHashCode();
         public string Path { get => _path; set => SetProperty(ref _path, value); }
@@ -69,39 +93,47 @@ namespace Soundboard.Models
 
         public void ClearHotKeys()
         {
-            shortcutKey = Key.None;
-            shortcutModifierKeys = ModifierKeys.None;
-            CreateShortcut();
+            tempShortcutKey = Key.None;
+            tempShortcutModifierKeys = ModifierKeys.None;
+            SaveShortcutKeys();
         }
 
         public void AddHotKey(Key k)
         {
             string s = k.ToString();
             if (s.Contains("Ctrl"))
-                shortcutModifierKeys |= ModifierKeys.Control;
+                tempShortcutModifierKeys |= ModifierKeys.Control;
             else if (s.Contains("Alt"))
-                shortcutModifierKeys |= ModifierKeys.Alt;
+                tempShortcutModifierKeys |= ModifierKeys.Alt;
             else if (s.Contains("Shift"))
-                shortcutModifierKeys |= ModifierKeys.Shift;
+                tempShortcutModifierKeys |= ModifierKeys.Shift;
             else if (s.Contains("Win"))
-                shortcutModifierKeys |= ModifierKeys.Windows;
+                tempShortcutModifierKeys |= ModifierKeys.Windows;
             else
-                shortcutKey = k;
+                tempShortcutKey = k;
 
-            CreateShortcut();
+            CreateShortcutString();
         }
 
-        void BackupShortcut()
+        public void SaveShortcutKeys()
         {
+            ShortcutKey = tempShortcutKey;
+            ShortcutModifierKeys = tempShortcutModifierKeys;
+            CreateShortcutString();
         }
 
-        void CreateShortcut()
+        void CreateShortcutString()
         {
-            string modif = shortcutModifierKeys.ToString().Replace("Control", "Ctrl").Replace("Windows", "Win").Replace(", ", " + ");
-            if (modif == "None")
-                Shortcut = shortcutKey.ToString();
-            else
-                Shortcut = string.Join(" + ", modif, shortcutKey);
+            if (tempShortcutModifierKeys == ModifierKeys.None)
+            {
+                if (tempShortcutKey == Key.None)
+                    Shortcut = "";
+                else
+                    Shortcut = tempShortcutKey.ToString();
+                return;
+            }
+            string modif = tempShortcutModifierKeys.ToString().Replace("Control", "Ctrl").Replace("Windows", "Win").Replace(", ", " + ");
+            Shortcut = string.Join(" + ", modif, tempShortcutKey);
             //shortcutKeys = Shortcut.Split('+').Select(s => s.Trim()).Select(s => { Enum.TryParse(s, out Key key); return key; }).ToList();
         }
 
@@ -150,6 +182,8 @@ namespace Soundboard.Models
 
         public void Stop()
         {
+            CurrentState = PlayingState.Stopped;
+            
             hardwareDevice?.Stop();
             hardwareDevice?.Dispose();
             hardwareDevice = null;
@@ -157,8 +191,6 @@ namespace Soundboard.Models
             virtualDevice?.Stop();
             virtualDevice?.Dispose();
             virtualDevice = null;
-
-            CurrentState = PlayingState.Stopped;
         }
 
         public override string ToString() => Name;
