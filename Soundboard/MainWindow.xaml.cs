@@ -46,6 +46,18 @@ namespace Soundboard
         public MainWindow()
         {
             InitializeComponent();
+
+            System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon
+            {
+                Icon = new System.Drawing.Icon(@"Assets\poop.ico"),
+                Visible = true
+            };
+            ni.DoubleClick += (sender, a) =>
+            {
+                Show();
+                WindowState = WindowState.Normal;
+            };
+
             Storage = new SoundStorage();
             VirtualDeviceNumber = -1;
             HardwareDeviceNumber = -1;
@@ -64,7 +76,14 @@ namespace Soundboard
             HardwareOutputDevices.SelectedItem = Settings.Default.HardwareOutputDeviceName;
 
             SoundsDisplayer.DataContext = Storage.Sounds;
+        }
 
+        protected override void OnStateChanged(EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+                this.Hide();
+
+            base.OnStateChanged(e);
         }
 
         protected override void OnSourceInitialized(EventArgs e)

@@ -25,8 +25,14 @@ namespace Soundboard.Storage
         }
         void CheckExists()
         {
+            if (!Directory.Exists("Storage"))
+            {
+                Directory.CreateDirectory("Storage");
+            }
             if (!File.Exists(SoundsPath))
+            {
                 File.WriteAllText(SoundsPath, "[]");
+            }
         }
 
         public bool LoadSounds()

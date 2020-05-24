@@ -8,7 +8,7 @@
         xmlns:prop="clr-namespace:Soundboard.Properties"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d" Foreground="Red" Background="LightGray"
-        Title="{x:Static prop:Resources.AppName}" 
+        Title="{x:Static prop:Resources.AppName}"
         MinHeight="300" MinWidth="500" Height="450" Width="800">
 
     <Window.Resources>
@@ -23,7 +23,8 @@
             <ToolBar >
                 <Button Content="Add New" Click="AddNewClick"/>
                 <Button Content="Stop All" Click="StopAllSoundsClick"/>
-                <Button Content="Delete All" Click="DeleteAllClick"/>
+                <Button Content="Delete All" ToolBar.OverflowMode="Always" Click="DeleteAllClick"/>
+                <CheckBox Content="Run At Start Up"/>
             </ToolBar>
             <ToolBar>
                 <Label Content="Hardware"/>
