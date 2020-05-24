@@ -19,10 +19,10 @@ namespace Soundboard.Storage
         public SoundStorage()
         {
             Sounds = new SuperObservableCollection<Sound>(SoundChange);
+            Sounds.CollectionChanged += Sounds_CollectionChanged;
             CheckExists();
             LoadSounds();
         }
-
         void CheckExists()
         {
             if (!File.Exists(SoundsPath))
@@ -48,6 +48,12 @@ namespace Soundboard.Storage
             return true;
         }
 
+        public bool RemoveSound(Sound sound)
+        {
+            Sounds.Remove(sound);
+            return true;
+        }
+
         public bool DeleteAll()
         {
             Sounds.Clear();
@@ -55,9 +61,20 @@ namespace Soundboard.Storage
             return true;
         }
 
+        public bool StopAll()
+        {
+            foreach (var s in Sounds)
+            {
+                s.Stop();
+            }
+            return true;
+        }
+
         public bool AddSound(string filepath) => AddSound(new Sound(filepath, Path.GetFileNameWithoutExtension(filepath)));
 
         private void SoundChange(object sender, PropertyChangedEventArgs e) => SaveSounds();
+        private void Sounds_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) => SaveSounds();
+
 
         public bool SaveSounds()
         {

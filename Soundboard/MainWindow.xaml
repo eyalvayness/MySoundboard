@@ -4,40 +4,109 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Soundboard"
+        xmlns:cvt="clr-namespace:Soundboard.Converters"
         xmlns:prop="clr-namespace:Soundboard.Properties"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d" Foreground="Red" Background="LightGray"
         Title="{x:Static prop:Resources.AppName}" 
         MinHeight="300" MinWidth="500" Height="450" Width="800">
-    <DockPanel>
-        <ToolBar DockPanel.Dock="Top">
-            <Button Content="Add New" Click="AddNewClick"/>
-            <Separator/>
-            <Label Content="Hardware"/>
-            <ComboBox Name="HardwareOutputDevices" SelectionChanged="ChangeHardwareOutputDevice"/>
-            <Label Content="Virtual"/>
-            <ComboBox Name="VirtualOutputDevices" SelectionChanged="ChangeVirtualOutputDevice"/>
-            <Separator/>
-            <Label Content="Volume"/>
-            <Slider Name="VolumeSlider" ValueChanged="ChangeVolume" VerticalAlignment="Center" Minimum="0" Maximum="100" TickFrequency="1" Width="100"/>
-            <Separator/>
-            <Button Content="Delete All" Click="DeleteAllClick"/>
-        </ToolBar>
 
-        <StackPanel Orientation="Vertical">
+    <Window.Resources>
+        <ResourceDictionary>
+            <cvt:StateToContentConverter x:Key="stateToContent"/>
+            <cvt:BoolToContentConverter x:Key="boolToContent"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <DockPanel>
+        <ToolBarPanel DockPanel.Dock="Top">
+            <ToolBar >
+                <Button Content="Add New" Click="AddNewClick"/>
+                <Button Content="Stop All" Click="StopAllSoundsClick"/>
+                <Button Content="Delete All" Click="DeleteAllClick"/>
+            </ToolBar>
+            <ToolBar>
+                <Label Content="Hardware"/>
+                <ComboBox Name="HardwareOutputDevices" SelectionChanged="ChangeHardwareOutputDevice"/>
+                <Label Content="Virtual"/>
+                <ComboBox Name="VirtualOutputDevices" SelectionChanged="ChangeVirtualOutputDevice"/>
+            </ToolBar>
+        </ToolBarPanel>
+
+        
+        <StackPanel Name="SoundsDisplayer">
+            <ItemsControl ItemsSource="{Binding}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="30"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="30"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="{Binding CurrentState, Converter={StaticResource stateToContent}}"
+                                    Click="PreviewOrStopClick" Margin="0,0,5,0"/>
+                            <Label Grid.Column="1" Content="{Binding Path}" Margin="5,0" ToolTip="Path"/>
+                            <TextBox Grid.Column="2" VerticalContentAlignment="Center" Text="{Binding Name}" Margin="5,0" ToolTip="Name"/>
+                            <TextBox Grid.Column="3" x:Name="ShortcutTextBox" VerticalContentAlignment="Center" Text="{Binding Shortcut}" Margin="5,0" 
+                                     Focusable="True" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus" IsReadOnly="True" ToolTip="Shortcut"/>
+                            <Button Grid.Column="4" Content="Ok" IsEnabled="{Binding ElementName=ShortcutTextBox, Path=IsFocused}" Margin="0,0,5,0"/>
+                            <Button Grid.Column="5" Content="X" Click="ResetShorcutClick" Margin="0,0,5,0"/>
+                            <Slider Grid.Column="6" Name="VolumeSlider" Value="{Binding Volume}"
+                                    VerticalAlignment="Center" Minimum="0" Maximum="100" TickFrequency="1" Margin="5,0"/>
+                            <Button Grid.Column="7" Content="{x:Static prop:Resources.Remove}"
+                                    Click="RemoveClick" Margin="5,0,0,0"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+            <!--
+        <ListView ItemsSource="{Binding}" Name="SoundsDisplayer">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="{x:Static prop:Resources.Preview}" Click="PreviewClick"/>
+                            <Label Grid.Column="1" Content="{Binding Path}"/>
+                            <TextBox Grid.Column="2" VerticalContentAlignment="Center" Text="{Binding Name}"/>
+                            <Button Grid.Column="3" Content="{x:Static prop:Resources.Remove}" Click="RemoveClick"/>
+                        </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            </ListView>
             <DataGrid ItemsSource="{Binding}" Name="SoundsDisplayer" AutoGenerateColumns="False" CanUserReorderColumns="False" SelectionUnit="CellOrRowHeader">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn IsReadOnly="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Preview" Click="Button_Click"/>
+                                <Button Content="{x:Static prop:Resources.Preview}" Click="PreviewClick"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Path" Binding="{Binding Path}" CanUserSort="False" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                    <DataGridTemplateColumn IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="{x:Static prop:Resources.Remove}" Click="RemoveClick"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
-        </StackPanel>
+            -->
     </DockPanel>
 </Window>
