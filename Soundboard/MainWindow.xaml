@@ -7,7 +7,7 @@
         xmlns:cvt="clr-namespace:Soundboard.Converters"
         xmlns:prop="clr-namespace:Soundboard.Properties"
         WindowStartupLocation="CenterScreen"
-        mc:Ignorable="d" Foreground="Red" Background="LightGray"
+        mc:Ignorable="d" Background="LightGray"
         Title="{x:Static prop:Resources.AppName}"
         MinHeight="300" MinWidth="500" Height="450" Width="800">
 
@@ -24,7 +24,7 @@
                 <Button Content="Add New" Click="AddNewClick"/>
                 <Button Content="Stop All" Click="StopAllSoundsClick"/>
                 <Button Content="Delete All" ToolBar.OverflowMode="Always" Click="DeleteAllClick"/>
-                <CheckBox Content="Run At Start Up"/>
+                <CheckBox Content="Run At Start Up" IsChecked="{Binding Source={x:Static prop:Settings.Default}, Path=RunOnStartup}"/>
             </ToolBar>
             <ToolBar>
                 <Label Content="Hardware"/>
@@ -34,7 +34,6 @@
             </ToolBar>
         </ToolBarPanel>
 
-        
         <StackPanel Name="SoundsDisplayer">
             <ItemsControl ItemsSource="{Binding}">
                 <ItemsControl.ItemTemplate>
@@ -69,46 +68,5 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </StackPanel>
-            <!--
-        <ListView ItemsSource="{Binding}" Name="SoundsDisplayer">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Grid HorizontalAlignment="Stretch">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Button Grid.Column="0" Content="{x:Static prop:Resources.Preview}" Click="PreviewClick"/>
-                            <Label Grid.Column="1" Content="{Binding Path}"/>
-                            <TextBox Grid.Column="2" VerticalContentAlignment="Center" Text="{Binding Name}"/>
-                            <Button Grid.Column="3" Content="{x:Static prop:Resources.Remove}" Click="RemoveClick"/>
-                        </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-            </ListView>
-            <DataGrid ItemsSource="{Binding}" Name="SoundsDisplayer" AutoGenerateColumns="False" CanUserReorderColumns="False" SelectionUnit="CellOrRowHeader">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn IsReadOnly="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="{x:Static prop:Resources.Preview}" Click="PreviewClick"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Path" Binding="{Binding Path}" CanUserSort="False" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                    <DataGridTemplateColumn IsReadOnly="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="{x:Static prop:Resources.Remove}" Click="RemoveClick"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-            -->
     </DockPanel>
 </Window>

@@ -49,7 +49,7 @@ namespace Soundboard
 
             System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon
             {
-                Icon = new System.Drawing.Icon(@"Assets\poop.ico"),
+                Icon = new System.Drawing.Icon(@"Assets\music.ico"),
                 Visible = true
             };
             ni.DoubleClick += (sender, a) =>
@@ -100,8 +100,6 @@ namespace Soundboard
                 if (s.VKey != 0)
                     RegisterHotKey(_windowHandle, s.Id, s.ModifsKey, s.VKey);
             }
-            //bool a = RegisterHotKey(_windowHandle, HOTKEY_ID, MOD_CONTROL, VK_CAPITAL); //CTRL + CAPS_LOCK
-            //bool b = RegisterHotKey(_windowHandle, HOTKEY_ID + 1, MOD_SHIFT, VK_CAPITAL);
         }
 
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
